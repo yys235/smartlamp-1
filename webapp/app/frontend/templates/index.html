@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}">
+</head>
+<body>
+    <main class="page-shell">
+        <section class="hero">
+            <div>
+                <p class="eyebrow">Smart Lamp</p>
+                <h1>{{ app_name }}</h1>
+                <p class="hero-copy">查看局域网灯泡状态，并在 Web 端完成全灯和单灯控制。</p>
+            </div>
+            <div class="hero-actions">
+                <button id="refreshStatusButton" class="button secondary" type="button">刷新状态</button>
+            </div>
+        </section>
+
+        <section class="panel status-panel">
+            <div class="panel-header">
+                <h2>网关状态</h2>
+                <span id="connectionBadge" class="badge offline">未连接</span>
+            </div>
+            <div id="gatewaySummary" class="summary-grid"></div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <h2>全灯控制</h2>
+                <p class="panel-copy">对全部灯泡统一设置颜色和亮度。</p>
+            </div>
+            <form id="globalControlForm" class="control-form">
+                <label>
+                    <span>颜色</span>
+                    <input id="globalColor" name="color" type="color" value="#ffffff">
+                </label>
+                <label>
+                    <span>亮度</span>
+                    <input id="globalIntensity" name="intensity" type="range" min="0" max="255" value="255">
+                    <output id="globalIntensityValue">255</output>
+                </label>
+                <div class="form-actions">
+                    <button class="button primary" type="submit">全部打开并应用</button>
+                    <button id="turnAllOffButton" class="button danger" type="button">全部关闭</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <h2>灯泡列表</h2>
+                <p class="panel-copy">按灯泡单独查看和控制。</p>
+            </div>
+            <div id="messageBanner" class="message" hidden></div>
+            <div id="lampGrid" class="lamp-grid"></div>
+        </section>
+    </main>
+
+    <template id="lampCardTemplate">
+        <article class="lamp-card">
+            <header class="lamp-card-header">
+                <div>
+                    <h3 class="lamp-title"></h3>
+                    <p class="lamp-meta"></p>
+                </div>
+                <span class="lamp-badge"></span>
+            </header>
+            <div class="lamp-color-preview"></div>
+            <dl class="lamp-stats">
+                <div>
+                    <dt>RGB</dt>
+                    <dd class="lamp-rgb"></dd>
+                </div>
+                <div>
+                    <dt>亮度</dt>
+                    <dd class="lamp-intensity"></dd>
+                </div>
+            </dl>
+            <form class="lamp-form">
+                <input class="lamp-device-id" type="hidden" name="device_id">
+                <label>
+                    <span>颜色</span>
+                    <input class="lamp-color-input" type="color" name="color">
+                </label>
+                <label>
+                    <span>亮度</span>
+                    <input class="lamp-intensity-input" type="range" name="intensity" min="0" max="255">
+                    <output class="lamp-intensity-output"></output>
+                </label>
+                <div class="form-actions">
+                    <button class="button primary" type="submit">应用到此灯</button>
+                    <button class="button danger lamp-off-button" type="button">关闭此灯</button>
+                </div>
+            </form>
+        </article>
+    </template>
+
+    <script src="{{ url_for('static', path='/js/app.js') }}" defer></script>
+</body>
+</html>
