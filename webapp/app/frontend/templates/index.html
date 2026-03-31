@@ -12,52 +12,99 @@
             <div>
                 <p class="eyebrow">Smart Lamp</p>
                 <h1>{{ app_name }}</h1>
-                <p class="hero-copy">查看局域网灯泡状态，并在 Web 端完成全灯和单灯控制。</p>
+                <p class="hero-copy">查看同网段网关列表，并对当前选中的网关进行灯泡查看和控制。</p>
             </div>
             <div class="hero-actions">
+                <div class="refresh-mode">
+                    <div class="mode-switch" role="group" aria-label="刷新模式">
+                        <button id="autoRefreshButton" class="button secondary is-active" type="button">自动刷新</button>
+                        <button id="manualRefreshButton" class="button secondary" type="button">手动刷新</button>
+                    </div>
+                    <p id="refreshModeHint" class="refresh-hint">当前为自动刷新，每 5 秒更新一次。</p>
+                </div>
                 <button id="refreshStatusButton" class="button secondary" type="button">刷新状态</button>
             </div>
         </section>
 
-        <section class="panel status-panel">
-            <div class="panel-header">
-                <h2>网关状态</h2>
-                <span id="connectionBadge" class="badge offline">未连接</span>
-            </div>
-            <div id="gatewaySummary" class="summary-grid"></div>
-        </section>
+        <div id="messageBanner" class="message" hidden></div>
 
-        <section class="panel">
-            <div class="panel-header">
-                <h2>全灯控制</h2>
-                <p class="panel-copy">对全部灯泡统一设置颜色和亮度。</p>
-            </div>
-            <form id="globalControlForm" class="control-form">
-                <label>
-                    <span>颜色</span>
-                    <input id="globalColor" name="color" type="color" value="#ffffff">
-                </label>
-                <label>
-                    <span>亮度</span>
-                    <input id="globalIntensity" name="intensity" type="range" min="0" max="255" value="255">
-                    <output id="globalIntensityValue">255</output>
-                </label>
-                <div class="form-actions">
-                    <button class="button primary" type="submit">全部打开并应用</button>
-                    <button id="turnAllOffButton" class="button danger" type="button">全部关闭</button>
+        <section class="dashboard-layout">
+            <aside class="panel side-panel">
+                <div class="panel-header compact-header">
+                    <div>
+                        <h2>网关列表</h2>
+                        <p class="panel-copy">点击切换控制对象。</p>
+                    </div>
                 </div>
-            </form>
-        </section>
+                <div id="gatewayGrid" class="gateway-grid"></div>
+            </aside>
 
-        <section class="panel">
-            <div class="panel-header">
-                <h2>灯泡列表</h2>
-                <p class="panel-copy">按灯泡单独查看和控制。</p>
+            <div class="main-stack">
+                <section class="panel status-panel">
+                    <div class="panel-header compact-header">
+                        <div>
+                            <h2>当前网关</h2>
+                            <p id="selectedGatewayLabel" class="panel-copy">尚未选中网关</p>
+                        </div>
+                        <span id="connectionBadge" class="badge offline">未选择</span>
+                    </div>
+                    <div id="gatewaySummary" class="summary-grid"></div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header compact-header">
+                        <div>
+                            <h2>全灯控制</h2>
+                            <p id="globalControlHint" class="panel-copy">对当前网关下的全部灯泡统一设置颜色和亮度。</p>
+                        </div>
+                    </div>
+                    <form id="globalControlForm" class="control-form">
+                        <label class="color-wheel-field">
+                            <span>颜色</span>
+                            <div class="color-wheel">
+                                <input id="globalColor" name="color" type="color" value="#ffffff">
+                            </div>
+                        </label>
+                        <div class="brightness-group">
+                            <label class="brightness-field">
+                                <span>亮度</span>
+                                <div class="brightness-inline">
+                                    <input id="globalIntensity" name="intensity" type="range" min="0" max="255" value="255">
+                                    <output id="globalIntensityValue">255</output>
+                                </div>
+                            </label>
+                            <div class="form-actions control-actions">
+                                <button class="button primary" type="submit">全部开启并应用</button>
+                                <button id="turnAllOffButton" class="button danger" type="button">全部关闭</button>
+                            </div>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header compact-header">
+                        <div>
+                            <h2>灯泡列表</h2>
+                            <p id="lampPanelHint" class="panel-copy">按当前网关下的灯泡单独查看和控制。</p>
+                        </div>
+                    </div>
+                    <div id="lampGrid" class="lamp-grid"></div>
+                </section>
             </div>
-            <div id="messageBanner" class="message" hidden></div>
-            <div id="lampGrid" class="lamp-grid"></div>
         </section>
     </main>
+
+    <template id="gatewayCardTemplate">
+        <button class="gateway-card" type="button">
+            <div class="gateway-card-header">
+                <span class="gateway-dot" aria-hidden="true"></span>
+            </div>
+            <div class="gateway-card-body">
+                <h3 class="gateway-title"></h3>
+                <p class="gateway-host"></p>
+            </div>
+        </button>
+    </template>
 
     <template id="lampCardTemplate">
         <article class="lamp-card">
