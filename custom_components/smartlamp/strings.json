@@ -1,0 +1,35 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect SmartLamp Web",
+        "description": "Connect Home Assistant to the SmartLamp webapp service.",
+        "data": {
+          "base_url": "Webapp URL",
+          "api_token": "API token",
+          "scan_interval": "Scan interval (seconds)",
+          "request_timeout": "Request timeout (seconds)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to SmartLamp webapp.",
+      "invalid_auth": "Authentication failed.",
+      "unknown": "Unexpected error."
+    },
+    "abort": {
+      "already_configured": "This SmartLamp instance is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "SmartLamp Options",
+        "data": {
+          "scan_interval": "Scan interval (seconds)",
+          "request_timeout": "Request timeout (seconds)"
+        }
+      }
+    }
+  }
+}

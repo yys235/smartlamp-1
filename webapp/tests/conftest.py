@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Generator
+from dataclasses import replace
 from pathlib import Path
 import sys
 
@@ -9,6 +10,7 @@ from fastapi.testclient import TestClient
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from app.core.config import settings
 from app.core.gateway import GatewayUnavailableError, LampNotFoundError
 from app.main import app
 
@@ -80,6 +82,14 @@ class FakeGateway:
     def stop(self) -> None:
         self.started = False
 
+    def get_system_info(self) -> dict[str, object]:
+        return {
+            "instance_id": "smartlamp-web-test",
+            "version": "0.2.0",
+            "api_version": "1",
+            "auth_enabled": False,
+        }
+
     def get_dashboard_data(self, gateway_id: int | None = None, refresh: bool = False) -> dict[str, object]:
         dashboard = dict(self.dashboard)
         if gateway_id is not None:
@@ -98,6 +108,34 @@ class FakeGateway:
 
     def list_gateways(self) -> list[dict[str, object]]:
         return list(self.dashboard["gateways"])
+
+    def get_gateway_status(
+        self,
+        gateway_id: int | None = None,
+        *,
+        refresh: bool = False,
+    ) -> dict[str, object] | None:
+        if gateway_id == 4040:
+            return None
+        current_gateway = self.dashboard["current_gateway"]
+        if gateway_id is None:
+            return dict(current_gateway)
+        matched = next(
+            (
+                gateway
+                for gateway in [current_gateway, *self.dashboard["gateways"]]
+                if gateway["gateway_id"] == gateway_id
+            ),
+            None,
+        )
+        if matched is None:
+            return None
+        payload = dict(matched)
+        if "lamps" not in payload:
+            payload["lamps"] = []
+        if refresh:
+            payload["refreshed"] = True
+        return payload
 
     def refresh_lamps(self, gateway_id: int | None = None) -> list[object]:
         if gateway_id == 4040:
@@ -143,6 +181,7 @@ class FakeGateway:
 
 @pytest.fixture
 def client(monkeypatch: pytest.MonkeyPatch) -> Generator[TestClient]:
+    monkeypatch.setattr("app.main.settings", replace(settings, api_token=None))
     monkeypatch.setattr("app.main.SmartLampGateway", FakeGateway)
     with TestClient(app) as test_client:
         yield test_client

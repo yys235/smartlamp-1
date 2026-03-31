@@ -66,6 +66,14 @@ class SmartLampGateway:
         self._udp_socket: socket.socket | None = None
         self._gateways: dict[int, GatewayState] = {}
 
+    def get_system_info(self) -> dict[str, object]:
+        return {
+            "instance_id": self.settings.instance_id,
+            "version": self.settings.app_version,
+            "api_version": self.settings.api_version,
+            "auth_enabled": bool(self.settings.api_token),
+        }
+
     def start(self) -> None:
         if self._listener_thread and self._listener_thread.is_alive():
             return
@@ -139,6 +147,9 @@ class SmartLampGateway:
                     LOGGER.exception("Failed to refresh lamps after gateway change for %s", gateway_id)
 
     def _wait_for_any_gateway(self) -> None:
+        with self._state_lock:
+            if self._gateways:
+                return
         if not self._discovery_event.wait(timeout=self.settings.discovery_timeout):
             raise GatewayUnavailableError("Gateway not discovered yet")
 
@@ -210,11 +221,17 @@ class SmartLampGateway:
             (0x00, 0x00, 0x00, 0x43)
         ) + lamp_bytes
 
+    def _is_gateway_connected(self, gateway: GatewayState) -> bool:
+        if gateway.last_seen is None:
+            return False
+        return (utc_now() - gateway.last_seen).total_seconds() <= self.settings.stale_gateway_seconds
+
     def _serialize_gateway_summary(self, gateway: GatewayState) -> dict[str, object]:
+        connected = self._is_gateway_connected(gateway)
         return {
             "gateway_id": gateway.gateway_id,
             "gateway_host": gateway.host,
-            "connected": gateway.connected,
+            "connected": connected,
             "last_seen": gateway.last_seen.isoformat() if gateway.last_seen else None,
             "last_communication": (
                 gateway.last_communication.isoformat()
@@ -356,7 +373,7 @@ class SmartLampGateway:
 
         gateways = self.list_gateways()
         return {
-            "connected": bool(gateways),
+            "connected": any(gateway["connected"] for gateway in gateways),
             "gateway_count": len(gateways),
             "selected_gateway_id": selected_gateway_id,
             "gateways": gateways,

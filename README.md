@@ -28,6 +28,8 @@ docs/       功能、灯控拆分、HA 接入设计文档
 - 亮度控制
 - 自动刷新 / 手动刷新切换
 - 面向 Home Assistant 接入的 REST API
+- 可选 API 令牌认证
+- `instance_id` / 单网关详情 / 网关离线判定
 
 默认本地访问地址：
 
@@ -63,6 +65,11 @@ cd webapp
 uv run pytest
 ```
 
+本次也增加了对 HA 自定义集成交付物的 smoke test：
+
+- `custom_components/smartlamp/manifest.json`
+- `custom_components/smartlamp/translations/*.json`
+
 当前仓库中的开发约定是：
 
 - 每次代码修改后都要自动运行一次测试
@@ -73,6 +80,7 @@ uv run pytest
 - 功能文档：[docs/functional-doc.md](docs/functional-doc.md)
 - 灯泡控制功能拆分：[docs/lamp-control-features.md](docs/lamp-control-features.md)
 - Home Assistant 接入设计文档：[docs/home-assistant-integration-design.md](docs/home-assistant-integration-design.md)
+- Home Assistant 实际部署说明：[docs/ha-deploy-guide.md](docs/ha-deploy-guide.md)
 
 ## Java 服务端说明
 
@@ -101,14 +109,26 @@ uv run pytest
 
 ## Home Assistant 接入方向
 
-当前推荐路线不是让 Home Assistant 直接对接底层 UDP/TCP 协议，而是：
+当前仓库已经按下面的路径实现了第一版接入：
 
-1. 保留 `webapp` 作为灯泡控制网关
-2. 开发 Home Assistant 自定义集成，通过 REST 调用 `webapp`
+`Home Assistant -> webapp -> 原灯网关 -> 灯泡`
 
-详细设计见：
+当前已交付：
 
-[docs/home-assistant-integration-design.md](docs/home-assistant-integration-design.md)
+- `custom_components/smartlamp/` 自定义集成骨架
+- `webapp` 侧 `/api/system`、`/api/gateways/{gateway_id}`、单灯控制路径
+- 可选 `Bearer Token` / `X-API-Key` 认证
+- 网关离线判定
+
+详细设计见 [docs/home-assistant-integration-design.md](docs/home-assistant-integration-design.md)。
+
+HA 使用方式：
+
+1. 启动 `webapp`
+2. 将 `custom_components/smartlamp` 复制到 Home Assistant 配置目录的 `custom_components/`
+3. 在 HA 界面中添加 `SmartLamp`
+4. 填入 `webapp` 地址，例如 `http://<smartlamp-host>:8100`
+5. 如启用了 `SMART_LAMP_API_TOKEN`，同时填入令牌
 
 ## 最近更新
 
@@ -119,9 +139,11 @@ uv run pytest
 - 优化 Web 页面布局和极端场景显示
 - 增加 `pytest` 自动化测试
 - 新增 Home Assistant 接入设计文档
+- 落地 Home Assistant 自定义集成第一版
+- `webapp` 增加 HA 友好的系统信息、认证和单网关接口
 
 ## 注意事项
 
 - `webapp` 需要与灯泡网关处于同一局域网
-- 当前接口默认用于内网环境，未默认启用认证
+- 当前接口默认用于内网环境，认证默认关闭，可通过 `SMART_LAMP_API_TOKEN` 启用
 - 多网关场景下，实体和控制都应以 `gateway_id + device_id` 作为唯一定位

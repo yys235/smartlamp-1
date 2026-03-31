@@ -24,6 +24,7 @@ async def lifespan(app: FastAPI):
     gateway = SmartLampGateway(settings)
     gateway.start()
     app.state.gateway = gateway
+    app.state.settings = settings
     try:
         yield
     finally:

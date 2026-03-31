@@ -1,0 +1,35 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "连接 SmartLamp Web",
+        "description": "将 Home Assistant 连接到 SmartLamp webapp 服务。",
+        "data": {
+          "base_url": "Webapp 地址",
+          "api_token": "API 令牌",
+          "scan_interval": "轮询间隔（秒）",
+          "request_timeout": "请求超时（秒）"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "无法连接到 SmartLamp webapp。",
+      "invalid_auth": "认证失败。",
+      "unknown": "发生未知错误。"
+    },
+    "abort": {
+      "already_configured": "这个 SmartLamp 实例已经配置过了。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "SmartLamp 选项",
+        "data": {
+          "scan_interval": "轮询间隔（秒）",
+          "request_timeout": "请求超时（秒）"
+        }
+      }
+    }
+  }
+}

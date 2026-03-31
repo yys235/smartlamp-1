@@ -1,0 +1,15 @@
+{
+  "domain": "smartlamp",
+  "name": "SmartLamp",
+  "codeowners": [
+    "@yys235"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/yys235/smartlamp-1/blob/main/docs/home-assistant-integration-design.md",
+  "integration_type": "hub",
+  "iot_class": "local_polling",
+  "loggers": [
+    "custom_components.smartlamp"
+  ],
+  "version": "0.1.0"
+}
